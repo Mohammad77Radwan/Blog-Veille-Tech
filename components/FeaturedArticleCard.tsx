@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { Calendar, ArrowRight } from 'lucide-react';
+import { motion, useMotionValue, useSpring } from 'framer-motion';
 import { TagBadge } from './TagBadge';
 import type { Article } from '@/types/blog';
 import { useReducedMotionPreference } from '@/components/animations/useReducedMotion';
@@ -20,8 +21,11 @@ function formatExactDateTime(dateValue: string): string {
 
 export function FeaturedArticleCard({ article }: { article: Article }) {
   const prefersReducedMotion = useReducedMotionPreference();
-  const [tilt, setTilt] = useState({ rotateX: 0, rotateY: 0 });
   const [exactDateTime, setExactDateTime] = useState(article.date);
+  const rotateX = useMotionValue(0);
+  const rotateY = useMotionValue(0);
+  const springX = useSpring(rotateX, { stiffness: 170, damping: 18, mass: 0.2 });
+  const springY = useSpring(rotateY, { stiffness: 170, damping: 18, mass: 0.2 });
 
   useEffect(() => {
     setExactDateTime(formatExactDateTime(article.date));
@@ -35,29 +39,31 @@ export function FeaturedArticleCard({ article }: { article: Article }) {
     const rect = event.currentTarget.getBoundingClientRect();
     const px = (event.clientX - rect.left) / rect.width;
     const py = (event.clientY - rect.top) / rect.height;
-    const rotateY = (px - 0.5) * 10;
-    const rotateX = (0.5 - py) * 8;
-
-    setTilt({ rotateX, rotateY });
+    rotateY.set((px - 0.5) * 12);
+    rotateX.set((0.5 - py) * 10);
   };
 
-  const resetTilt = () => setTilt({ rotateX: 0, rotateY: 0 });
+  const resetTilt = () => {
+    rotateX.set(0);
+    rotateY.set(0);
+  };
 
   return (
-    <article
+    <motion.article
       className="interactive-card p-6 md:p-7 cursor-pointer flex flex-col h-full relative overflow-hidden group-hover:shadow-[0_20px_65px_rgba(56,189,248,0.16)]"
       style={{
         perspective: '800px',
-        transform: prefersReducedMotion
-          ? undefined
-          : `rotateX(${tilt.rotateX}deg) rotateY(${tilt.rotateY}deg) translateY(-2px)`,
-        transition: 'transform 220ms ease, box-shadow 280ms ease',
+        rotateX: prefersReducedMotion ? 0 : springX,
+        rotateY: prefersReducedMotion ? 0 : springY,
+        transformStyle: 'preserve-3d',
       }}
+      whileHover={prefersReducedMotion ? undefined : { scale: 1.02, y: -4 }}
+      transition={{ type: 'spring', stiffness: 170, damping: 17 }}
       onMouseMove={handleMove}
       onMouseLeave={resetTilt}
     >
       <span
-        className="absolute -right-10 -top-10 h-24 w-24 rounded-full bg-sky-400/10 blur-2xl"
+        className="absolute -right-10 -top-10 h-24 w-24 rounded-full bg-indigo-400/20 blur-2xl"
         aria-hidden="true"
       />
 
@@ -68,7 +74,7 @@ export function FeaturedArticleCard({ article }: { article: Article }) {
 
       {/* Middle: Title and Description */}
       <div className="flex-grow mb-4">
-        <h3 className="text-lg md:text-xl font-semibold text-slate-100 mb-2 line-clamp-2 leading-snug">
+        <h3 className="text-xl md:text-2xl font-semibold text-slate-50 mb-2 line-clamp-2 leading-snug">
           {article.title}
         </h3>
         <p className="text-xs uppercase tracking-wide text-sky-200/90 mb-2">
@@ -89,6 +95,6 @@ export function FeaturedArticleCard({ article }: { article: Article }) {
         </div>
         <ArrowRight className="w-4 h-4 text-slate-300 flex-shrink-0 transition-transform duration-300 group-hover:translate-x-1" />
       </div>
-    </article>
+    </motion.article>
   );
 }
