@@ -1,9 +1,14 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, CalendarDays } from 'lucide-react';
+import { auth } from '@clerk/nextjs/server';
 import { Reveal } from '@/components/animations/Reveal';
 import { MarkdownArticle } from '@/components/content/MarkdownArticle';
 import { getPostBySlug } from '@/actions/postActions';
+import { PostSocialPanel } from '@/components/social/PostSocialPanel';
+import { isClerkConfigured } from '@/lib/clerk';
+
+export const dynamic = 'force-dynamic';
 
 interface BlogPostPageProps {
   params: {
@@ -19,6 +24,8 @@ function estimateReadTimeFromContent(content: string): string {
 
 export default async function BlogPostPage({ params }: BlogPostPageProps) {
   const post = await getPostBySlug(params.slug);
+  const clerkEnabled = isClerkConfigured();
+  const { userId } = clerkEnabled ? await auth() : { userId: null };
 
   if (!post) {
     notFound();
@@ -28,6 +35,22 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
     dateStyle: 'medium',
     timeStyle: 'short',
   });
+  const initialLiked = userId ? post.likes.some((like) => like.authorId === userId) : false;
+  const comments = post.comments.map((comment) => ({
+    id: comment.id,
+    postId: comment.postId,
+    authorId: comment.authorId,
+    parentId: comment.parentId,
+    body: comment.body,
+    createdAt: comment.createdAt.toISOString(),
+    updatedAt: comment.updatedAt.toISOString(),
+    author: {
+      id: comment.author.id,
+      name: comment.author.name,
+      email: comment.author.email,
+      imageUrl: comment.author.imageUrl,
+    },
+  }));
 
   return (
     <main className="min-h-screen relative overflow-hidden">
@@ -54,6 +77,9 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
           <p className="text-slate-300 mb-4 text-base md:text-lg">{post.description}</p>
 
           <div className="flex flex-wrap items-center gap-4 text-xs text-slate-400">
+            <span>Written by {post.authorName}</span>
+            <span className="inline-flex items-center gap-1.5">{post._count.likes} likes</span>
+            <span className="inline-flex items-center gap-1.5">{post._count.comments} comments</span>
             <span className="inline-flex items-center gap-1.5">
               <CalendarDays className="w-4 h-4" aria-hidden="true" />
               {publishedAt}
@@ -67,6 +93,20 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
             <MarkdownArticle content={post.content} />
           </article>
         </Reveal>
+
+        {clerkEnabled ? (
+          <Reveal delay={0.18}>
+            <PostSocialPanel
+              postId={post.id}
+              postSlug={post.slug}
+              postTitle={post.title}
+              initialLikeCount={post._count.likes}
+              initialShareCount={post.shareCount}
+              initialLiked={initialLiked}
+              comments={comments}
+            />
+          </Reveal>
+        ) : null}
       </div>
     </main>
   );

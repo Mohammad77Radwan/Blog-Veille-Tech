@@ -71,6 +71,9 @@ export function FeaturedArticleCard({ article }: { article: Article }) {
         <h3 className="text-lg md:text-xl font-semibold text-slate-100 mb-2 line-clamp-2 leading-snug">
           {article.title}
         </h3>
+        <p className="text-xs uppercase tracking-wide text-sky-200/90 mb-2">
+          Written by {article.author}
+        </p>
         <p className="text-sm text-slate-400 line-clamp-2 leading-relaxed">
           {article.description}
         </p>

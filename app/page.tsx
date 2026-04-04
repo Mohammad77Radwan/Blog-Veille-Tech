@@ -9,6 +9,8 @@ import { FeaturedArticleCard } from '@/components/FeaturedArticleCard';
 import { ListArticleCard } from '@/components/ListArticleCard';
 import type { Article } from '@/types/blog';
 
+export const dynamic = 'force-dynamic';
+
 function estimateReadTimeFromContent(content: string): string {
   const wordCount = content.trim().split(/\s+/).filter(Boolean).length;
   const minutes = Math.max(1, Math.ceil(wordCount / 220));
@@ -20,6 +22,7 @@ export default async function Home() {
   const mappedPosts = posts.map((post) => ({
     slug: post.slug,
     article: {
+      author: post.authorName,
       title: post.title,
       description: post.description,
       date: new Date(post.createdAt).toISOString(),

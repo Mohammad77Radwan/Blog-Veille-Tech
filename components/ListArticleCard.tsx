@@ -61,6 +61,9 @@ export function ListArticleCard({ article }: { article: Article }) {
           <h3 className="text-base md:text-lg font-semibold text-slate-100 mb-2 md:mb-0 leading-snug">
             {article.title}
           </h3>
+          <p className="mt-1 text-xs uppercase tracking-wide text-emerald-200/90">
+            Written by {article.author}
+          </p>
         </div>
 
         {/* Middle: Meta information row */}

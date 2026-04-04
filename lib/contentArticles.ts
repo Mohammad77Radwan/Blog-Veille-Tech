@@ -1,10 +1,12 @@
 import { promises as fs } from 'fs';
 import path from 'path';
 import matter from 'gray-matter';
+import { AUTHOR_NAME } from '@/lib/site';
 
 export interface ContentArticle {
   id: string;
   slug: string;
+  author: string;
   title: string;
   description: string;
   content: string;
@@ -103,6 +105,7 @@ export async function getContentArticles(): Promise<ContentArticle[]> {
       const { data, content } = matter(rawFile);
 
       const title = String(data.title ?? '').trim();
+      const author = String(data.author ?? AUTHOR_NAME).trim() || AUTHOR_NAME;
       const description = String(data.description ?? '').trim();
       const category = String(data.category ?? '').trim();
       const readTime = String(data.readTime ?? '').trim();
@@ -112,6 +115,7 @@ export async function getContentArticles(): Promise<ContentArticle[]> {
       return {
         id: `content-${slug}`,
         slug,
+        author,
         title,
         description,
         content,

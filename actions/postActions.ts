@@ -1,8 +1,13 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { getContentArticleBySlug, getContentArticles } from '@/lib/contentArticles';
+import { requireAdminUser } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import {
+  getUnifiedPostBySlug,
+  getUnifiedPosts,
+  syncContentArticlesToDatabase,
+} from '@/lib/posts';
 
 function slugify(title: string): string {
   return title
@@ -30,6 +35,7 @@ async function getUniqueSlug(baseSlug: string): Promise<string> {
 }
 
 export async function createPost(formData: FormData): Promise<void> {
+  const adminUser = await requireAdminUser();
   const title = String(formData.get('title') ?? '').trim();
   const description = String(formData.get('description') ?? '').trim();
   const category = String(formData.get('category') ?? '').trim();
@@ -51,37 +57,25 @@ export async function createPost(formData: FormData): Promise<void> {
       content,
       category,
       readTime,
+      authorId: adminUser.id,
+      authorName: adminUser.name ?? adminUser.email,
+      source: 'DATABASE',
+      published: true,
     },
   });
 
   revalidatePath('/');
+  revalidatePath('/admin');
 }
 
 export async function getPosts() {
-  const [dbPosts, contentPosts] = await Promise.all([
-    prisma.post.findMany({
-      orderBy: {
-        createdAt: 'desc',
-      },
-    }),
-    getContentArticles(),
-  ]);
-
-  return [...dbPosts, ...contentPosts].sort(
-    (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
-  );
+  return getUnifiedPosts();
 }
 
 export async function getPostBySlug(slug: string) {
-  const dbPost = await prisma.post.findUnique({
-    where: {
-      slug,
-    },
-  });
+  return getUnifiedPostBySlug(slug);
+}
 
-  if (dbPost) {
-    return dbPost;
-  }
-
-  return getContentArticleBySlug(slug);
+export async function syncPostsFromContent() {
+  await syncContentArticlesToDatabase();
 }
