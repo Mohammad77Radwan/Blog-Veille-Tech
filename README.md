@@ -7,15 +7,15 @@ I build full-stack systems that combine AI-enabled workflows, scalable architect
 I optimize architecture for reliability, iteration speed, and operational clarity. The frontend should stay close to users at the edge, APIs should protect domain boundaries, background processing should handle asynchronous load safely, and observability should be treated as part of product quality from day one.
 
 ```mermaid
-flowchart LR
-    U[Users] --> E[Edge CDN]
-    E --> N[Next.js App]
-    N --> AG[API Gateway]
-    AG --> DS[Domain Services]
-    DS --> BW[Background Workers]
-    BW --> DB[(PostgreSQL DB)]
-    DB --> Q[Queues]
-    Q --> OBS[Logging and Tracing OBS]
+graph TD
+    U["Users"] --> E["Edge CDN"]
+    E --> N["Next.js App"]
+    N --> AG["API Gateway"]
+    AG --> DS["Domain Services"]
+    DS --> BW["Background Workers"]
+    BW --> DB[("PostgreSQL DB")]
+    DB --> Q["Queues"]
+    Q --> OBS["Logging and Tracing OBS"]
 ```
 
 ## Technical Arsenal
