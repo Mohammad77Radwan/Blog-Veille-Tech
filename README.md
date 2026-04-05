@@ -8,14 +8,14 @@ I optimize architecture for reliability, iteration speed, and operational clarit
 
 ```mermaid
 flowchart LR
-        U[Users] --> E[Edge/CDN]
-        E --> N[Next.js App]
-        N --> AG[API Gateway]
-        AG --> DS[Domain Services]
-        DS --> BW[Background Workers]
-        BW --> DB[(PostgreSQL DB)]
-        DB --> Q[Queues]
-        Q --> OBS["Logging and Tracing (OBS)"]
+    U[Users] --> E[Edge CDN]
+    E --> N[Next.js App]
+    N --> AG[API Gateway]
+    AG --> DS[Domain Services]
+    DS --> BW[Background Workers]
+    BW --> DB[(PostgreSQL DB)]
+    DB --> Q[Queues]
+    Q --> OBS[Logging and Tracing OBS]
 ```
 
 ## Technical Arsenal
@@ -68,18 +68,18 @@ export async function getLiveSocialCounters(postId: string): Promise<LiveSocialC
 
 | Context (Project/Role) | Architecture/Stack | Business Impact |
 | --- | --- | --- |
-| [Insert achievement 1] | [Insert architecture and stack] | [Insert measurable impact] |
-| [Insert achievement 2] | [Insert architecture and stack] | [Insert measurable impact] |
-| [Insert achievement 3] | [Insert architecture and stack] | [Insert measurable impact] |
-| [Insert achievement 4] | [Insert architecture and stack] | [Insert measurable impact] |
+| Full-stack publishing platform | Next.js 14 App Router, TypeScript, Prisma, PostgreSQL, Clerk | Delivered a production-ready content platform with secure admin workflows and consistent release flow |
+| Real interaction metrics migration | Server Actions, Prisma schema evolution, optimistic UI updates | Replaced static social placeholders with database-backed counters to improve trust in engagement signals |
+| Community discussions and moderation | Nested comment tree, role-based actions, admin moderation controls | Enabled safer community participation with live reactions and controlled deletion paths |
+| Newsletter and subscriber lifecycle | Prisma subscriber model, Resend integration, unsubscribe endpoint | Added a repeatable audience-retention channel from post publication to managed unsubscribe flow |
 
 ## Continuous Learning
 
 I am currently exploring:
 
-- [Insert advanced technical topic 1]
-- [Insert advanced technical topic 2]
-- [Insert advanced technical topic 3]
+- Evaluation strategies for LLM and RAG systems in real production workflows
+- Advanced PostgreSQL performance tuning, indexing, and query observability
+- Kubernetes workload design for resilient background workers and asynchronous pipelines
 
 ## Lets Connect
 
