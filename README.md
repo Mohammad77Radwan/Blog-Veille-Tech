@@ -1,177 +1,61 @@
-# Blog Veille Tech
+# Mohammad Radwan
 
-A production-ready developer blog built with **Next.js 14 (App Router)**, **TypeScript**, **Tailwind CSS**, and **lucide-react icons**.
+I build reliable, user-focused web products with pragmatic architecture, measurable impact, and team-first engineering practices.
 
-## Features
+## Engineering Philosophy
 
-✨ **Design System**
+- Build for outcomes, not hype: every technical decision should improve user value, reliability, or delivery speed.
+- Strong opinions, weakly held: make a call, validate quickly, and iterate with evidence.
+- Documentation is a feature: clear docs reduce onboarding time and production risk.
+- Prefer simple, scalable systems: maintainability and clarity beat unnecessary complexity.
 
-- Strict dark mode with deep space navy design (`bg-[#0A0F1C]`)
-- Clean Inter sans-serif typography
-- Cards with subtle hover animations (`hover:-translate-y-1`)
-- Responsive grid and list layouts
-- Newsletter subscription with email notifications for new posts
+## Architecture and Mental Model
 
-📁 **Project Structure**
-
-- Fully typed components with TypeScript
-- Featured articles grid (responsive 1-2 columns)
-- Latest articles list with metadata (date, read time, category)
-- Tag badges for article categories
-- Icons from lucide-react (Calendar, Clock, ArrowRight)
-
-🎨 **Components**
-
-- `TagBadge`: Reusable category pills
-- `FeaturedArticleCard`: Grid-based featured articles
-- `ListArticleCard`: List-based article display
-- Responsive mobile-first layouts
-
-## Tech Stack
-
-- **Framework**: Next.js 14 with App Router
-- **Language**: TypeScript
-- **Styling**: Tailwind CSS
-- **Icons**: lucide-react
-- **Font**: Inter (from next/font/google)
-
-## Getting Started
-
-### Prerequisites
-
-- Node.js 18+ (LTS recommended)
-- npm, yarn, or pnpm
-
-### Installation
-
-```bash
-# Install dependencies
-npm install
-# or
-yarn install
-# or
-pnpm install
+```mermaid
+flowchart LR
+    U[Users] --> E[Edge/CDN]
+    E --> W[Next.js App]
+    W --> AG[API or Server Actions]
+    AG --> S1[Domain Services]
+    AG --> S2[Background Workers]
+    S1 --> DB[(PostgreSQL)]
+    S2 --> DB
+    S2 --> Q[Queues and Events]
+    AG --> OBS[Logs, Metrics, Tracing]
+    S2 --> OBS
 ```
 
-### Development
+## Technical Arsenal
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-```
+| Category | Core Technologies | Primary Use Case and Philosophy |
+| --- | --- | --- |
+| Frontend | TypeScript, React, Next.js, Tailwind CSS | Build fast, accessible interfaces with strong typing and predictable UI patterns |
+| Backend | Node.js, Server Actions, API Routes, Prisma | Deliver domain logic with clear boundaries and production-safe defaults |
+| Data | PostgreSQL, Prisma ORM | Keep data integrity central and evolve schema safely over time |
+| Auth and Access | Clerk, role-based permissions | Secure onboarding and enforce least-privilege access by default |
+| Delivery Platform | Vercel, GitHub Actions, Docker | Optimize release velocity while preserving deployment stability |
+| Quality and Ops | Type checks, build gates, structured logging | Catch issues early and maintain short feedback loops |
 
-Open [http://localhost:3000](http://localhost:3000) in your browser to see the blog.
+## High-Impact Delivery
 
-### Newsletter Email Setup
+| Context | Architecture and Stack | Business Impact |
+| --- | --- | --- |
+| Developer blog platform | Next.js App Router, Prisma, PostgreSQL, Clerk | Shipped a production-ready publishing system with secure admin flows |
+| Interactive social metrics | Server Actions, optimistic UI, DB counters | Replaced fake engagement values with real database-driven metrics |
+| Comment moderation and reactions | Role-aware actions, recursive discussions, admin controls | Enabled safer community interaction with admin deletion and comment reactions |
+| Team enablement | Typed patterns, reusable components, architecture docs | Improved maintainability and reduced contributor onboarding friction |
 
-To send email notifications to subscribers when a new article is published, configure these variables in your `.env`:
+## Current Focus
 
-```bash
-RESEND_API_KEY=your_resend_api_key
-NEWSLETTER_FROM_EMAIL=Blog <newsletter@yourdomain.com>
-NEXT_PUBLIC_APP_URL=http://localhost:3000
-```
+I am currently deepening skills in:
 
-If these variables are not set, subscriptions are still saved in the database, but no emails are sent.
+- System design for high-scale web systems
+- Postgres query performance and schema optimization
+- Advanced frontend architecture for resilient UX
+- Better observability and operational practices in production
 
-### Production Build
+## Lets Connect
 
-```bash
-npm run build
-npm start
-```
-
-## Project Structure
-
-```text
-Blog-Veille-Tech/
-├── app/
-│   ├── layout.tsx           # Root layout with metadata
-│   ├── globals.css          # Global Tailwind styles
-│   └── page.tsx             # Home page with articles
-├── components/
-│   ├── TagBadge.tsx         # Category badge component
-│   ├── FeaturedArticleCard.tsx   # Featured article card
-│   └── ListArticleCard.tsx   # List article card
-├── types/
-│   └── blog.ts              # Article interface
-├── tailwind.config.ts       # Tailwind configuration
-├── tsconfig.json            # TypeScript configuration
-├── next.config.js           # Next.js configuration
-├── postcss.config.js        # PostCSS configuration
-└── package.json             # Dependencies
-```
-
-## Design System
-
-### Colors
-
-- **Background**: `#0A0F1C` (deep space navy)
-- **Card**: `#131A2B`
-- **Text Primary**: `text-slate-100`
-- **Text Secondary**: `text-slate-400`
-- **Border**: `border-slate-800/50`
-- **Category Tag**: `bg-indigo-950/50 text-indigo-300`
-
-### Typography
-
-- **Font**: Inter (from next/font)
-- **Heading 1**: `text-4xl md:text-5xl font-bold`
-- **Heading 2**: `text-2xl md:text-3xl font-semibold`
-- **Card Title**: `text-lg font-semibold`
-- **List Title**: `text-base font-semibold`
-- **Meta Text**: `text-xs text-slate-400`
-
-### Spacing
-
-- **Container**: `max-w-5xl mx-auto px-6 py-12`
-- **Section Gap**: `mb-16`
-- **Card Gap**: `gap-6` (featured), `gap-4` (list)
-
-## Extending the Blog
-
-### Adding New Articles
-
-Edit `app/page.tsx` to add articles to the `featuredArticles` or `latestArticles` arrays:
-
-```typescript
-const featuredArticles: Article[] = [
-  {
-    title: 'Article Title',
-    description: 'Short description...',
-    date: '1 jan',
-    readTime: '5 min',
-    category: 'Category',
-  },
-  // Add more articles...
-];
-```
-
-### Customizing Colors
-
-Update the custom colors in `tailwind.config.ts`:
-
-```typescript
-colors: {
-  'space-navy': '#0A0F1C',
-  'card-dark': '#131A2B',
-}
-```
-
-## Performance Optimizations
-
-- Server components by default (faster rendering)
-- Image optimization ready
-- CSS bundle optimized with Tailwind
-- Zero JavaScript for static content
-
-## License
-
-MIT
-
-## Author
-
-Mohammad Radwan
+- GitHub: [github.com/Mohammad77Radwan](https://github.com/Mohammad77Radwan)
+- LinkedIn: Add your LinkedIn link
+- Email: Add your email address
