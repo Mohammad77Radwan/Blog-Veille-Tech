@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/prisma';
-import { getContentArticles } from '@/lib/contentArticles';
+import { getContentArticleBySlug, getContentArticles } from '@/lib/contentArticles';
 
 export type PublicPostRecord = Awaited<ReturnType<typeof prisma.post.findMany>>[number];
 
@@ -63,49 +63,84 @@ export async function getUnifiedPosts() {
 }
 
 export async function getUnifiedPostBySlug(slug: string) {
-  await syncContentArticlesToDatabase();
-
-  return prisma.post.findUnique({
-    where: { slug },
-    include: {
-      author: {
-        select: {
-          id: true,
-          name: true,
-          email: true,
-          imageUrl: true,
-          role: true,
+  try {
+    const post = await prisma.post.findUnique({
+      where: { slug },
+      include: {
+        author: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            imageUrl: true,
+            role: true,
+          },
         },
-      },
-      comments: {
-        where: {
-          deletedAt: null,
-        },
-        orderBy: {
-          createdAt: 'asc',
-        },
-        include: {
-          author: {
-            select: {
-              id: true,
-              name: true,
-              email: true,
-              imageUrl: true,
+        comments: {
+          where: {
+            deletedAt: null,
+          },
+          orderBy: {
+            createdAt: 'asc',
+          },
+          include: {
+            author: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+                imageUrl: true,
+              },
             },
           },
         },
-      },
-      likes: {
-        select: {
-          authorId: true,
+        likes: {
+          select: {
+            authorId: true,
+          },
+        },
+        _count: {
+          select: {
+            likes: true,
+            comments: true,
+          },
         },
       },
-      _count: {
-        select: {
-          likes: true,
-          comments: true,
-        },
-      },
+    });
+
+    if (post) {
+      return post;
+    }
+  } catch (error) {
+    console.error('Unable to load post from database, falling back to content source', error);
+  }
+
+  const contentArticle = await getContentArticleBySlug(slug);
+  if (!contentArticle) {
+    return null;
+  }
+
+  return {
+    id: contentArticle.id,
+    slug: contentArticle.slug,
+    title: contentArticle.title,
+    description: contentArticle.description,
+    content: contentArticle.content,
+    category: contentArticle.category,
+    readTime: contentArticle.readTime,
+    authorName: contentArticle.author,
+    source: 'CONTENT',
+    published: true,
+    shareCount: 0,
+    authorId: null,
+    author: null,
+    comments: [],
+    likes: [],
+    createdAt: contentArticle.createdAt,
+    updatedAt: contentArticle.createdAt,
+    _count: {
+      likes: 0,
+      comments: 0,
     },
-  });
+  };
 }

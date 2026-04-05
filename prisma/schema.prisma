@@ -101,3 +101,16 @@ model Follow {
   @@index([followerId])
   @@index([followingId])
 }
+
+model Subscriber {
+  id               String   @id @default(cuid())
+  email            String   @unique
+  isActive         Boolean  @default(true)
+  unsubscribeToken String   @unique @default(cuid())
+  subscribedAt     DateTime @default(now())
+  unsubscribedAt   DateTime?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([isActive])
+}

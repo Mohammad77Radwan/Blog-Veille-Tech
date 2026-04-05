@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { requireAdminUser } from '@/lib/auth';
+import { notifySubscribersOfNewPost } from '@/lib/newsletter';
 import { prisma } from '@/lib/prisma';
 import {
   getUnifiedPostBySlug,
@@ -49,7 +50,7 @@ export async function createPost(formData: FormData): Promise<void> {
   const baseSlug = slugify(title);
   const slug = await getUniqueSlug(baseSlug);
 
-  await prisma.post.create({
+  const post = await prisma.post.create({
     data: {
       slug,
       title,
@@ -63,6 +64,16 @@ export async function createPost(formData: FormData): Promise<void> {
       published: true,
     },
   });
+
+  try {
+    await notifySubscribersOfNewPost({
+      title: post.title,
+      description: post.description,
+      slug: post.slug,
+    });
+  } catch (error) {
+    console.error('Unable to send newsletter notifications for post creation', error);
+  }
 
   revalidatePath('/');
   revalidatePath('/admin');

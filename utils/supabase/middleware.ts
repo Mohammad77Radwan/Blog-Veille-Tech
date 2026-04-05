@@ -11,25 +11,33 @@ export const createClient = async (request: NextRequest) => {
     },
   });
 
-  const supabase = createServerClient(supabaseUrl!, supabaseKey!, {
-    cookies: {
-      getAll() {
-        return request.cookies.getAll();
-      },
-      setAll(cookiesToSet) {
-        cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
-        supabaseResponse = NextResponse.next({
-          request,
-        });
-        cookiesToSet.forEach(({ name, value, options }) =>
-          supabaseResponse.cookies.set(name, value, options),
-        );
-      },
-    },
-  });
+  if (!supabaseUrl || !supabaseKey) {
+    return supabaseResponse;
+  }
 
-  // Touch auth on every request so Supabase can refresh session cookies when needed.
-  await supabase.auth.getUser();
+  try {
+    const supabase = createServerClient(supabaseUrl, supabaseKey, {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll();
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
+          supabaseResponse = NextResponse.next({
+            request,
+          });
+          cookiesToSet.forEach(({ name, value, options }) =>
+            supabaseResponse.cookies.set(name, value, options),
+          );
+        },
+      },
+    });
+
+    // Touch auth on every request so Supabase can refresh session cookies when needed.
+    await supabase.auth.getUser();
+  } catch (error) {
+    console.error('Supabase middleware auth refresh failed', error);
+  }
 
   return supabaseResponse;
 };

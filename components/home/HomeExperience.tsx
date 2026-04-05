@@ -2,10 +2,11 @@
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, useScroll, useTransform } from 'framer-motion';
 import { Flame, Newspaper, Sparkles } from 'lucide-react';
 import { CountUp } from '@/components/animations/CountUp';
 import { OrbitShowcase } from '@/components/home/OrbitShowcase';
+import { NewsletterSignup } from '@/components/home/NewsletterSignup';
 import { TopicMarquee } from '@/components/home/TopicMarquee';
 import { FeaturedArticleCard } from '@/components/FeaturedArticleCard';
 import { ListArticleCard } from '@/components/ListArticleCard';
@@ -42,6 +43,8 @@ const rise = {
 
 export function HomeExperience({ posts, featuredPosts, latestPosts, categoryCount }: HomeExperienceProps) {
   const [statsReady, setStatsReady] = useState(false);
+  const { scrollY, scrollYProgress } = useScroll();
+  const heroY = useTransform(scrollY, [0, 700], [0, 90]);
 
   useEffect(() => {
     const timer = window.setTimeout(() => setStatsReady(true), 780);
@@ -50,6 +53,11 @@ export function HomeExperience({ posts, featuredPosts, latestPosts, categoryCoun
 
   return (
     <main className="relative min-h-screen overflow-hidden">
+      <motion.div
+        aria-hidden="true"
+        className="fixed inset-x-0 top-0 z-[60] h-1 origin-left bg-gradient-to-r from-indigo-400 via-fuchsia-400 to-sky-300"
+        style={{ scaleX: scrollYProgress }}
+      />
       <span className="mesh-accent" aria-hidden="true" />
 
       <motion.div
@@ -60,7 +68,7 @@ export function HomeExperience({ posts, featuredPosts, latestPosts, categoryCoun
       >
         <motion.section variants={rise} className="glass-shell lift-hover mb-10 overflow-hidden p-6 md:p-10">
           <div className="grid grid-cols-1 items-center gap-8 lg:grid-cols-[1.35fr_0.9fr]">
-            <div>
+            <motion.div style={{ y: heroY }}>
               <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-indigo-300/20 bg-indigo-500/10 px-3 py-1 text-xs text-indigo-100">
                 <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
                 Veille creative, utile et actionnable
@@ -100,7 +108,7 @@ export function HomeExperience({ posts, featuredPosts, latestPosts, categoryCoun
                   </div>
                 </motion.div>
               </motion.div>
-            </div>
+            </motion.div>
 
             <div className="hidden justify-end lg:flex">
               <OrbitShowcase />
@@ -165,6 +173,10 @@ export function HomeExperience({ posts, featuredPosts, latestPosts, categoryCoun
               </div>
             )}
           </motion.div>
+        </motion.section>
+
+        <motion.section variants={rise} className="mt-14">
+          <NewsletterSignup />
         </motion.section>
       </motion.div>
     </main>

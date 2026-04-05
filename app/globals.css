@@ -38,10 +38,10 @@
     inset: 0;
     pointer-events: none;
     z-index: -10;
-    opacity: 0.35;
-    background: radial-gradient(circle at 45% 15%, rgba(125, 211, 252, 0.16), transparent 38%),
-      radial-gradient(circle at 72% 65%, rgba(52, 211, 153, 0.1), transparent 40%);
-    animation: pulseGlow 9s ease-in-out infinite;
+    opacity: 0.2;
+    mix-blend-mode: soft-light;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220' viewBox='0 0 220 220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.78' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
+    animation: filmGrain 0.22s steps(2) infinite;
   }
 
   *:focus-visible {
@@ -203,6 +203,27 @@
   }
   50% {
     opacity: 0.5;
+  }
+}
+
+@keyframes filmGrain {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  20% {
+    transform: translate3d(-1%, 1.5%, 0);
+  }
+  40% {
+    transform: translate3d(2%, -1%, 0);
+  }
+  60% {
+    transform: translate3d(-1.5%, 1%, 0);
+  }
+  80% {
+    transform: translate3d(1%, -1.5%, 0);
+  }
+  100% {
+    transform: translate3d(0, 0, 0);
   }
 }
 

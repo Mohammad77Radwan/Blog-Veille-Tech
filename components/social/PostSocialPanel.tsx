@@ -1,8 +1,9 @@
 'use client';
 
-import { useOptimistic, useState, useTransition, type ReactNode } from 'react';
+import { useEffect, useOptimistic, useState, useTransition, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { SignInButton, useUser } from '@clerk/nextjs';
+import { AnimatePresence, motion } from 'framer-motion';
 import { Heart, MessageSquare, Send, Share2, Reply, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { AvatarFallback, AvatarImage, AvatarWrapper } from '@/components/ui/avatar';
@@ -29,6 +30,24 @@ interface PostSocialPanelProps {
   initialShareCount: number;
   initialLiked: boolean;
   comments: SocialCommentRecord[];
+}
+
+type ShareChannel = 'whatsapp' | 'x' | 'linkedin';
+
+function buildShareTargetUrl(channel: ShareChannel, articleUrl: string, articleTitle: string): string {
+  const encodedUrl = encodeURIComponent(articleUrl);
+  const encodedTitle = encodeURIComponent(articleTitle);
+
+  switch (channel) {
+    case 'whatsapp':
+      return `https://wa.me/?text=${encodeURIComponent(`${articleTitle} ${articleUrl}`)}`;
+    case 'x':
+      return `https://twitter.com/intent/tweet?text=${encodedTitle}&url=${encodedUrl}`;
+    case 'linkedin':
+      return `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`;
+    default:
+      return '';
+  }
 }
 
 function formatRelativeTime(value: string): string {
@@ -70,7 +89,11 @@ export function PostSocialPanel({
   const router = useRouter();
   const { isSignedIn, user } = useUser();
   const [isPending, startTransition] = useTransition();
+  const [isSharing, setIsSharing] = useState(false);
+  const [showShareTargets, setShowShareTargets] = useState(false);
   const [composerValue, setComposerValue] = useState('');
+  const [likeBurstId, setLikeBurstId] = useState(0);
+  const [showLikeBurst, setShowLikeBurst] = useState(false);
 
   const [optimisticLikeState, addOptimisticLike] = useOptimistic(
     { count: initialLikeCount, liked: initialLiked },
@@ -99,10 +122,16 @@ export function PostSocialPanel({
       return;
     }
 
+    const isIncrement = !optimisticLikeState.liked;
     addOptimisticLike({
       delta: optimisticLikeState.liked ? -1 : 1,
       liked: !optimisticLikeState.liked,
     });
+
+    if (isIncrement) {
+      setLikeBurstId((value) => value + 1);
+      setShowLikeBurst(true);
+    }
 
     try {
       await toggleLikeAction(postId);
@@ -112,26 +141,47 @@ export function PostSocialPanel({
     }
   }
 
-  async function handleShare() {
-    addOptimisticShare(1);
+  useEffect(() => {
+    if (!showLikeBurst) {
+      return;
+    }
+
+    const timer = window.setTimeout(() => setShowLikeBurst(false), 620);
+    return () => window.clearTimeout(timer);
+  }, [showLikeBurst, likeBurstId]);
+
+  function handleShareToggle() {
+    setShowShareTargets((value) => !value);
+  }
+
+  async function handleShareTargetClick(channel: ShareChannel) {
+    if (isSharing) {
+      return;
+    }
 
     const shareUrl = typeof window !== 'undefined' ? `${window.location.origin}/blog/${postSlug}` : '';
+    if (!shareUrl) {
+      toast.error('URL de partage indisponible.');
+      return;
+    }
+
+    const targetUrl = buildShareTargetUrl(channel, shareUrl, postTitle);
+    if (!targetUrl) {
+      toast.error('Canal de partage invalide.');
+      return;
+    }
+
+    window.open(targetUrl, '_blank', 'noopener,noreferrer');
+    setIsSharing(true);
 
     try {
-      if (navigator.share) {
-        await navigator.share({
-          title: postTitle,
-          url: shareUrl,
-        });
-      } else if (navigator.clipboard && shareUrl) {
-        await navigator.clipboard.writeText(shareUrl);
-        toast.success('Lien copié dans le presse-papiers.');
-      }
-
+      addOptimisticShare(1);
       await sharePostAction(postId);
       startTransition(() => router.refresh());
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Impossible de partager cet article.');
+      toast.error(error instanceof Error ? error.message : 'Impossible de mettre a jour le compteur de partage.');
+    } finally {
+      setIsSharing(false);
     }
   }
 
@@ -184,13 +234,15 @@ export function PostSocialPanel({
           onClick={handleLike}
           disabled={isPending}
           highlight={optimisticLikeState.liked}
+          popKey={likeBurstId}
+          floatingDelta={showLikeBurst ? '+1' : null}
         />
         <ActionStat
           icon={<Share2 className="h-4 w-4" />}
           label="Share"
           value={optimisticShareCount}
-          onClick={handleShare}
-          disabled={isPending}
+          onClick={handleShareToggle}
+          disabled={isPending || isSharing}
         />
         <ActionStat
           icon={<MessageSquare className="h-4 w-4" />}
@@ -200,6 +252,23 @@ export function PostSocialPanel({
           disabled={isPending}
         />
       </div>
+
+      {showShareTargets ? (
+        <div className="-mt-2 rounded-2xl border border-slate-800/70 bg-slate-950/40 p-4">
+          <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Partager via</p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <Button type="button" size="sm" onClick={() => handleShareTargetClick('whatsapp')} disabled={isPending || isSharing}>
+              WhatsApp
+            </Button>
+            <Button type="button" size="sm" onClick={() => handleShareTargetClick('x')} disabled={isPending || isSharing}>
+              X
+            </Button>
+            <Button type="button" size="sm" onClick={() => handleShareTargetClick('linkedin')} disabled={isPending || isSharing}>
+              LinkedIn
+            </Button>
+          </div>
+        </div>
+      ) : null}
 
       <div id="comments" className="glass-shell p-6 md:p-8">
         <div className="flex items-center justify-between gap-4 mb-6">
@@ -255,6 +324,8 @@ function ActionStat({
   onClick,
   disabled,
   highlight = false,
+  popKey,
+  floatingDelta,
 }: {
   icon: ReactNode;
   label: string;
@@ -262,14 +333,42 @@ function ActionStat({
   onClick: () => void;
   disabled?: boolean;
   highlight?: boolean;
+  popKey?: number;
+  floatingDelta?: string | null;
 }) {
   return (
-    <button
+    <motion.button
       type="button"
       onClick={onClick}
       disabled={disabled}
-      className={`interactive-card flex items-center justify-between gap-4 p-4 text-left ${highlight ? 'border-sky-400/40 bg-sky-500/10' : ''}`}
+      className={`interactive-card relative flex items-center justify-between gap-4 p-4 text-left ${highlight ? 'border-sky-400/40 bg-sky-500/10' : ''}`}
+        whileTap={{ scale: 0.93 }}
+      animate={popKey ? { scale: [1, 1.16, 0.97, 1] } : undefined}
+      transition={
+        popKey
+          ? {
+              type: 'spring',
+              stiffness: 500,
+              damping: 15,
+              mass: 0.24,
+            }
+          : undefined
+      }
     >
+      <AnimatePresence>
+        {floatingDelta && popKey ? (
+          <motion.span
+            key={popKey}
+            className="pointer-events-none absolute right-4 top-2 text-sm font-semibold text-emerald-300"
+            initial={{ opacity: 0, y: 0, scale: 0.7 }}
+            animate={{ opacity: 1, y: -22, scale: 1.05 }}
+            exit={{ opacity: 0, y: -34, scale: 0.9 }}
+            transition={{ duration: 0.55, ease: 'easeOut' }}
+          >
+            {floatingDelta}
+          </motion.span>
+        ) : null}
+      </AnimatePresence>
       <div>
         <div className="flex items-center gap-2 text-sm text-slate-300">
           <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-800 text-slate-100">{icon}</span>
@@ -278,7 +377,7 @@ function ActionStat({
         <div className="mt-2 text-2xl font-semibold text-slate-100">{value}</div>
       </div>
       <Reply className="h-4 w-4 text-slate-500" />
-    </button>
+    </motion.button>
   );
 }
 

@@ -11,7 +11,12 @@ const middleware = isClerkConfigured()
         return NextResponse.next();
       }
 
-      const response = await createClient(request);
+      let response = NextResponse.next();
+      try {
+        response = await createClient(request);
+      } catch (error) {
+        console.error('Supabase middleware createClient failed', error);
+      }
 
       // Admin checks happen in the page/action layer to allow explicit redirects instead of opaque 404s.
       if (isAdminRoute(request)) {
@@ -20,8 +25,18 @@ const middleware = isClerkConfigured()
 
       return response;
     })
-  : async (request: Parameters<typeof createClient>[0]) =>
-      request.headers.has('next-action') ? NextResponse.next() : createClient(request);
+  : async (request: Parameters<typeof createClient>[0]) => {
+      if (request.headers.has('next-action')) {
+        return NextResponse.next();
+      }
+
+      try {
+        return await createClient(request);
+      } catch (error) {
+        console.error('Supabase middleware createClient failed', error);
+        return NextResponse.next();
+      }
+    };
 
 export default middleware;
 

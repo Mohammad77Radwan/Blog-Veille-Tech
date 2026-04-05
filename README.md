@@ -10,6 +10,7 @@ A production-ready developer blog built with **Next.js 14 (App Router)**, **Type
 - Clean Inter sans-serif typography
 - Cards with subtle hover animations (`hover:-translate-y-1`)
 - Responsive grid and list layouts
+- Newsletter subscription with email notifications for new posts
 
 📁 **Project Structure**
 
@@ -63,6 +64,18 @@ pnpm dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) in your browser to see the blog.
+
+### Newsletter Email Setup
+
+To send email notifications to subscribers when a new article is published, configure these variables in your `.env`:
+
+```bash
+RESEND_API_KEY=your_resend_api_key
+NEWSLETTER_FROM_EMAIL=Blog <newsletter@yourdomain.com>
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+```
+
+If these variables are not set, subscriptions are still saved in the database, but no emails are sent.
 
 ### Production Build
 
