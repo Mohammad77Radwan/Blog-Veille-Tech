@@ -1,61 +1,87 @@
 # Mohammad Radwan
 
-I build reliable, user-focused web products with pragmatic architecture, measurable impact, and team-first engineering practices.
+I build full-stack systems that combine AI-enabled workflows, scalable architecture, and practical engineering playbooks for teams shipping real products.
 
-## Engineering Philosophy
+## System Architecture and Mental Model
 
-- Build for outcomes, not hype: every technical decision should improve user value, reliability, or delivery speed.
-- Strong opinions, weakly held: make a call, validate quickly, and iterate with evidence.
-- Documentation is a feature: clear docs reduce onboarding time and production risk.
-- Prefer simple, scalable systems: maintainability and clarity beat unnecessary complexity.
-
-## Architecture and Mental Model
+I optimize architecture for reliability, iteration speed, and operational clarity. The frontend should stay close to users at the edge, APIs should protect domain boundaries, background processing should handle asynchronous load safely, and observability should be treated as part of product quality from day one.
 
 ```mermaid
 flowchart LR
-    U[Users] --> E[Edge/CDN]
-    E --> W[Next.js App]
-    W --> AG[API or Server Actions]
-    AG --> S1[Domain Services]
-    AG --> S2[Background Workers]
-    S1 --> DB[(PostgreSQL)]
-    S2 --> DB
-    S2 --> Q[Queues and Events]
-    AG --> OBS[Logs, Metrics, Tracing]
-    S2 --> OBS
+        U[Users] --> E[Edge/CDN]
+        E --> N[Next.js App]
+        N --> AG[API Gateway]
+        AG --> DS[Domain Services]
+        DS --> BW[Background Workers]
+        BW --> DB[(PostgreSQL DB)]
+        DB --> Q[Queues]
+        Q --> OBS["Logging and Tracing (OBS)"]
 ```
 
 ## Technical Arsenal
 
-| Category | Core Technologies | Primary Use Case and Philosophy |
+| Category | Core Technologies | Primary Use Case / Philosophy |
 | --- | --- | --- |
-| Frontend | TypeScript, React, Next.js, Tailwind CSS | Build fast, accessible interfaces with strong typing and predictable UI patterns |
-| Backend | Node.js, Server Actions, API Routes, Prisma | Deliver domain logic with clear boundaries and production-safe defaults |
-| Data | PostgreSQL, Prisma ORM | Keep data integrity central and evolve schema safely over time |
-| Auth and Access | Clerk, role-based permissions | Secure onboarding and enforce least-privilege access by default |
-| Delivery Platform | Vercel, GitHub Actions, Docker | Optimize release velocity while preserving deployment stability |
-| Quality and Ops | Type checks, build gates, structured logging | Catch issues early and maintain short feedback loops |
+| Frontend and Experience | TypeScript, Next.js | Build accessible, maintainable product surfaces with clear UX contracts |
+| Backend and Services | Go, TypeScript | Implement explicit domain boundaries and production-safe service logic |
+| Systems Programming | Rust | Use where performance, memory safety, or low-level control is required |
+| Data and Persistence | PostgreSQL | Preserve data integrity and model business truth with strong transactional guarantees |
+| Platform and Orchestration | Kubernetes | Run distributed workloads with repeatable deployment and scaling patterns |
+| AI and Retrieval | LLMs, Vector DBs | Ship grounded AI features with retrieval, evaluation, and observable behavior |
+
+## Engineering Philosophy
+
+- Pragmatism over perfection: optimize for durable progress and measurable value.
+- Documentation is a feature: clear docs reduce production risk and onboarding time.
+- Architect for trade-offs, not absolutes: each decision has cost, latency, and maintenance implications.
+- Ship, measure, refine: hard-won lessons from production should shape the next iteration.
+
+## Social Metric Hub
+
+My blog discussions are designed around real interactions, not vanity counters: authenticated users, visible avatars, threaded replies, and moderation controls tied to role-based access. Engagement metrics are backed by database records and rendered as live counters in the UI.
+
+Placeholder implementation pattern:
+
+```ts
+// Placeholder: real implementation uses server actions + database writes
+type LiveSocialCounters = {
+    postViews: number;
+    postLikes: number;
+    commentLikes: number;
+    commentDislikes: number;
+    nestedReplyCount: number;
+};
+
+export async function getLiveSocialCounters(postId: string): Promise<LiveSocialCounters> {
+    // Replace with real DB aggregation queries
+    return {
+        postViews: 0,
+        postLikes: 0,
+        commentLikes: 0,
+        commentDislikes: 0,
+        nestedReplyCount: 0,
+    };
+}
+```
 
 ## High-Impact Delivery
 
-| Context | Architecture and Stack | Business Impact |
+| Context (Project/Role) | Architecture/Stack | Business Impact |
 | --- | --- | --- |
-| Developer blog platform | Next.js App Router, Prisma, PostgreSQL, Clerk | Shipped a production-ready publishing system with secure admin flows |
-| Interactive social metrics | Server Actions, optimistic UI, DB counters | Replaced fake engagement values with real database-driven metrics |
-| Comment moderation and reactions | Role-aware actions, recursive discussions, admin controls | Enabled safer community interaction with admin deletion and comment reactions |
-| Team enablement | Typed patterns, reusable components, architecture docs | Improved maintainability and reduced contributor onboarding friction |
+| [Insert achievement 1] | [Insert architecture and stack] | [Insert measurable impact] |
+| [Insert achievement 2] | [Insert architecture and stack] | [Insert measurable impact] |
+| [Insert achievement 3] | [Insert architecture and stack] | [Insert measurable impact] |
+| [Insert achievement 4] | [Insert architecture and stack] | [Insert measurable impact] |
 
-## Current Focus
+## Continuous Learning
 
-I am currently deepening skills in:
+I am currently exploring:
 
-- System design for high-scale web systems
-- Postgres query performance and schema optimization
-- Advanced frontend architecture for resilient UX
-- Better observability and operational practices in production
+- [Insert advanced technical topic 1]
+- [Insert advanced technical topic 2]
+- [Insert advanced technical topic 3]
 
 ## Lets Connect
 
-- GitHub: [github.com/Mohammad77Radwan](https://github.com/Mohammad77Radwan)
-- LinkedIn: Add your LinkedIn link
-- Email: Add your email address
+- GitHub: [Mohammad77Radwan on GitHub](https://github.com/Mohammad77Radwan)
+- Email: [mohammadradwan804@gmail.com](mailto:mohammadradwan804@gmail.com)
