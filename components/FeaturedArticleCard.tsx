@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Calendar, ArrowRight } from 'lucide-react';
+import { Calendar, ArrowRight, Clock3, Eye } from 'lucide-react';
 import { motion, useMotionTemplate, useMotionValue, useSpring } from 'framer-motion';
 import { TagBadge } from './TagBadge';
 import type { Article } from '@/types/blog';
@@ -57,7 +57,7 @@ export function FeaturedArticleCard({ article }: { article: Article }) {
 
   return (
     <motion.article
-      className="interactive-card p-6 md:p-7 cursor-pointer flex flex-col h-full relative overflow-hidden group-hover:shadow-[0_20px_65px_rgba(56,189,248,0.16)]"
+      className="interactive-card p-5 md:p-6 cursor-pointer flex flex-col h-full relative overflow-hidden group-hover:shadow-[0_20px_65px_rgba(56,189,248,0.16)]"
       style={{
         perspective: '800px',
         rotateX: prefersReducedMotion ? 0 : springX,
@@ -80,12 +80,12 @@ export function FeaturedArticleCard({ article }: { article: Article }) {
       />
 
       {/* Top: TagBadge */}
-      <div className="mb-4">
+      <div className="mb-3">
         <TagBadge category={article.category} />
       </div>
 
       {/* Middle: Title and Description */}
-      <div className="flex-grow mb-4">
+      <div className="flex-grow mb-3">
         <h3 className="text-xl md:text-2xl font-semibold text-slate-50 mb-2 line-clamp-2 leading-snug">
           {article.title}
         </h3>
@@ -99,10 +99,18 @@ export function FeaturedArticleCard({ article }: { article: Article }) {
 
       {/* Footer: Meta information and arrow */}
       <div className="flex items-center justify-between gap-4 border-t border-slate-800/60 pt-4">
-        <div className="flex items-center gap-3 text-xs text-slate-400">
+        <div className="flex flex-wrap items-center gap-3 text-xs text-slate-400">
           <div className="flex items-center gap-1">
             <Calendar className="w-4 h-4" />
             <span suppressHydrationWarning>{exactDateTime}</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <Clock3 className="w-4 h-4" />
+            <span>{article.readTime} read</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <Eye className="w-4 h-4" />
+            <span>{article.views} views</span>
           </div>
         </div>
         <ArrowRight className="w-4 h-4 text-slate-300 flex-shrink-0 transition-transform duration-300 group-hover:translate-x-1" />

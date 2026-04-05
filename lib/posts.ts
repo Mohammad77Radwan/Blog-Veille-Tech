@@ -54,7 +54,7 @@ export async function getUnifiedPosts() {
       },
       _count: {
         select: {
-          likes: true,
+          likeRecords: true,
           comments: true,
         },
       },
@@ -94,14 +94,14 @@ export async function getUnifiedPostBySlug(slug: string) {
             },
           },
         },
-        likes: {
+        likeRecords: {
           select: {
             authorId: true,
           },
         },
         _count: {
           select: {
-            likes: true,
+            likeRecords: true,
             comments: true,
           },
         },
@@ -109,6 +109,16 @@ export async function getUnifiedPostBySlug(slug: string) {
     });
 
     if (post) {
+      await prisma.post.update({
+        where: { id: post.id },
+        data: {
+          views: {
+            increment: 1,
+          },
+        },
+      });
+
+      post.views += 1;
       return post;
     }
   } catch (error) {
@@ -131,15 +141,17 @@ export async function getUnifiedPostBySlug(slug: string) {
     authorName: contentArticle.author,
     source: 'CONTENT',
     published: true,
+    views: 0,
+    likes: 0,
     shareCount: 0,
     authorId: null,
     author: null,
     comments: [],
-    likes: [],
+    likeRecords: [],
     createdAt: contentArticle.createdAt,
     updatedAt: contentArticle.createdAt,
     _count: {
-      likes: 0,
+      likeRecords: 0,
       comments: 0,
     },
   };

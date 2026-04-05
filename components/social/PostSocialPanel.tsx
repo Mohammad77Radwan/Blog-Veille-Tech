@@ -4,13 +4,16 @@ import { useEffect, useOptimistic, useState, useTransition, type ReactNode } fro
 import { useRouter } from 'next/navigation';
 import { SignInButton, useUser } from '@clerk/nextjs';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Heart, MessageSquare, Send, Share2, Reply, Sparkles } from 'lucide-react';
+import { Heart, MessageSquare, Send, Share2, Reply, Sparkles, ThumbsDown, ThumbsUp, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { AvatarFallback, AvatarImage, AvatarWrapper } from '@/components/ui/avatar';
 import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
 import {
   createCommentAction,
+  deleteCommentAction,
+  dislikeCommentAction,
+  likeCommentAction,
   sharePostAction,
   toggleLikeAction,
 } from '@/actions/socialActions';
@@ -29,6 +32,7 @@ interface PostSocialPanelProps {
   initialLikeCount: number;
   initialShareCount: number;
   initialLiked: boolean;
+  isAdmin: boolean;
   comments: SocialCommentRecord[];
 }
 
@@ -84,6 +88,7 @@ export function PostSocialPanel({
   initialLikeCount,
   initialShareCount,
   initialLiked,
+  isAdmin,
   comments,
 }: PostSocialPanelProps) {
   const router = useRouter();
@@ -202,6 +207,8 @@ export function PostSocialPanel({
       authorId: currentUser.id,
       parentId: parentId ?? null,
       body: trimmedBody,
+      likes: 0,
+      dislikes: 0,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       author: currentUser,
@@ -221,6 +228,48 @@ export function PostSocialPanel({
       startTransition(() => router.refresh());
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Impossible de publier le commentaire.');
+    }
+  }
+
+  async function handleLikeComment(commentId: string) {
+    if (!isSignedIn) {
+      toast.message('Connectez-vous pour réagir.');
+      return;
+    }
+
+    try {
+      await likeCommentAction(commentId);
+      startTransition(() => router.refresh());
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Impossible de liker ce commentaire.');
+    }
+  }
+
+  async function handleDislikeComment(commentId: string) {
+    if (!isSignedIn) {
+      toast.message('Connectez-vous pour réagir.');
+      return;
+    }
+
+    try {
+      await dislikeCommentAction(commentId);
+      startTransition(() => router.refresh());
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Impossible de disliker ce commentaire.');
+    }
+  }
+
+  async function handleDeleteComment(commentId: string) {
+    if (!isAdmin) {
+      return;
+    }
+
+    try {
+      await deleteCommentAction(commentId);
+      toast.success('Commentaire supprime.');
+      startTransition(() => router.refresh());
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Impossible de supprimer ce commentaire.');
     }
   }
 
@@ -306,6 +355,10 @@ export function PostSocialPanel({
                 comment={comment}
                 onSubmitReply={handleCreateComment}
                 currentUser={currentUser}
+                isAdmin={isAdmin}
+                onLikeComment={handleLikeComment}
+                onDislikeComment={handleDislikeComment}
+                onDeleteComment={handleDeleteComment}
               />
             ))
           ) : (
@@ -430,10 +483,18 @@ function CommentNodeView({
   comment,
   onSubmitReply,
   currentUser,
+  isAdmin,
+  onLikeComment,
+  onDislikeComment,
+  onDeleteComment,
 }: {
   comment: SocialCommentNode;
   onSubmitReply: (payload: { body: string; parentId?: string | null }) => Promise<void>;
   currentUser: SocialUserSummary | null;
+  isAdmin: boolean;
+  onLikeComment: (commentId: string) => Promise<void>;
+  onDislikeComment: (commentId: string) => Promise<void>;
+  onDeleteComment: (commentId: string) => Promise<void>;
 }) {
   const [showReply, setShowReply] = useState(false);
   const [replyValue, setReplyValue] = useState('');
@@ -451,14 +512,45 @@ function CommentNodeView({
             <span className="text-xs text-slate-500">{formatRelativeTime(comment.createdAt)}</span>
           </div>
           <p className="mt-2 whitespace-pre-wrap text-sm leading-7 text-slate-300">{comment.body}</p>
-          <button
-            type="button"
-            className="mt-3 inline-flex items-center gap-1 text-xs text-sky-300 hover:text-sky-200"
-            onClick={() => setShowReply((value) => !value)}
-          >
-            <Reply className="h-3.5 w-3.5" />
-            Répondre
-          </button>
+          <div className="mt-3 flex flex-wrap items-center gap-3">
+            <button
+              type="button"
+              className="inline-flex items-center gap-1 text-xs text-sky-300 hover:text-sky-200"
+              onClick={() => setShowReply((value) => !value)}
+            >
+              <Reply className="h-3.5 w-3.5" />
+              Repondre
+            </button>
+
+            <button
+              type="button"
+              className="inline-flex items-center gap-1 text-xs text-slate-300 hover:text-slate-100"
+              onClick={() => onLikeComment(comment.id)}
+            >
+              <ThumbsUp className="h-3.5 w-3.5" />
+              <span>{comment.likes}</span>
+            </button>
+
+            <button
+              type="button"
+              className="inline-flex items-center gap-1 text-xs text-slate-300 hover:text-slate-100"
+              onClick={() => onDislikeComment(comment.id)}
+            >
+              <ThumbsDown className="h-3.5 w-3.5" />
+              <span>{comment.dislikes}</span>
+            </button>
+
+            {isAdmin ? (
+              <button
+                type="button"
+                className="inline-flex items-center gap-1 text-xs text-rose-300 hover:text-rose-200"
+                onClick={() => onDeleteComment(comment.id)}
+                aria-label="Supprimer le commentaire"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </button>
+            ) : null}
+          </div>
         </div>
       </div>
 
@@ -486,6 +578,10 @@ function CommentNodeView({
               comment={child}
               onSubmitReply={onSubmitReply}
               currentUser={currentUser}
+              isAdmin={isAdmin}
+              onLikeComment={onLikeComment}
+              onDislikeComment={onDislikeComment}
+              onDeleteComment={onDeleteComment}
             />
           ))}
         </div>

@@ -1,12 +1,11 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { Flame, Newspaper, Sparkles } from 'lucide-react';
 import { CountUp } from '@/components/animations/CountUp';
 import { OrbitShowcase } from '@/components/home/OrbitShowcase';
-import { NewsletterSignup } from '@/components/home/NewsletterSignup';
 import { TopicMarquee } from '@/components/home/TopicMarquee';
 import { FeaturedArticleCard } from '@/components/FeaturedArticleCard';
 import { ListArticleCard } from '@/components/ListArticleCard';
@@ -23,6 +22,7 @@ interface HomeExperienceProps {
   featuredPosts: HomeMappedPost[];
   latestPosts: HomeMappedPost[];
   categoryCount: number;
+  topSlot?: ReactNode;
 }
 
 const container = {
@@ -41,7 +41,7 @@ const rise = {
   show: { opacity: 1, y: 0 },
 };
 
-export function HomeExperience({ posts, featuredPosts, latestPosts, categoryCount }: HomeExperienceProps) {
+export function HomeExperience({ posts, featuredPosts, latestPosts, categoryCount, topSlot }: HomeExperienceProps) {
   const [statsReady, setStatsReady] = useState(false);
   const { scrollY, scrollYProgress } = useScroll();
   const heroY = useTransform(scrollY, [0, 700], [0, 90]);
@@ -116,6 +116,8 @@ export function HomeExperience({ posts, featuredPosts, latestPosts, categoryCoun
           </div>
         </motion.section>
 
+        {topSlot ? <motion.section variants={rise} className="mb-12">{topSlot}</motion.section> : null}
+
         <motion.section variants={rise} className="mb-14">
           <TopicMarquee />
         </motion.section>
@@ -175,9 +177,6 @@ export function HomeExperience({ posts, featuredPosts, latestPosts, categoryCoun
           </motion.div>
         </motion.section>
 
-        <motion.section variants={rise} className="mt-14">
-          <NewsletterSignup />
-        </motion.section>
       </motion.div>
     </main>
   );

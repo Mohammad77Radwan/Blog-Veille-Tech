@@ -30,11 +30,13 @@ model Post {
   authorName  String       @default("Mohammad Radwan")
   source      PostSource    @default(CONTENT)
   published   Boolean      @default(true)
+  views       Int          @default(0)
+  likes       Int          @default(0)
   shareCount  Int          @default(0)
   authorId    String?
   author      User?        @relation(fields: [authorId], references: [id], onDelete: SetNull)
   comments    Comment[]
-  likes       Like[]
+  likeRecords Like[]
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
 }
@@ -49,7 +51,7 @@ model User {
   role      UserRole  @default(USER)
   posts     Post[]
   comments  Comment[]
-  likes     Like[]
+  likeRecords Like[]
   followers Follow[]  @relation("Followers")
   following Follow[]  @relation("Following")
   createdAt DateTime  @default(now())
@@ -62,6 +64,8 @@ model Comment {
   authorId   String
   parentId   String?
   body       String
+  likes      Int       @default(0)
+  dislikes   Int       @default(0)
   isEdited   Boolean   @default(false)
   deletedAt  DateTime?
   createdAt  DateTime  @default(now())

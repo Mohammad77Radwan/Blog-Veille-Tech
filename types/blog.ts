@@ -5,4 +5,6 @@ export interface Article {
   date: string;
   readTime: string;
   category: string;
+  views: number;
+  likes: number;
 }

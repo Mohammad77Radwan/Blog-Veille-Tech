@@ -7,6 +7,7 @@ import { isClerkConfigured } from '@/lib/clerk';
 import { getCurrentDbUser } from '@/lib/auth';
 import { Toaster } from 'sonner';
 import { Header } from '@/components/Header';
+import { Footer } from '@/components/Footer';
 import './globals.css';
 
 const inter = Inter({ subsets: ['latin'] });
@@ -34,6 +35,7 @@ export default async function RootLayout({
             <AmbientOrbs />
             <Header clerkEnabled={clerkEnabled} canSeeAdmin={canSeeAdmin} />
             <div className="pt-20 md:pt-24">{children}</div>
+            <Footer />
             <Toaster richColors position="top-right" theme="dark" />
           </ClerkProvider>
         ) : (
@@ -41,6 +43,7 @@ export default async function RootLayout({
             <AmbientOrbs />
             <Header clerkEnabled={clerkEnabled} canSeeAdmin={canSeeAdmin} />
             <div className="pt-20 md:pt-24">{children}</div>
+            <Footer />
             <Toaster richColors position="top-right" theme="dark" />
           </>
         )}

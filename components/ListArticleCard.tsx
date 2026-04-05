@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Calendar, ArrowRight } from 'lucide-react';
+import { Calendar, ArrowRight, Clock3, Heart } from 'lucide-react';
 import { motion, useMotionTemplate, useMotionValue, useSpring } from 'framer-motion';
 import { TagBadge } from './TagBadge';
 import type { Article } from '@/types/blog';
@@ -90,6 +90,14 @@ export function ListArticleCard({ article }: { article: Article }) {
           <div className="flex items-center gap-1">
             <Calendar className="w-4 h-4" />
             <span suppressHydrationWarning>{exactDateTime}</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <Clock3 className="w-4 h-4" />
+            <span>{article.readTime} read</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <Heart className="w-4 h-4" />
+            <span>{article.likes} likes</span>
           </div>
           <TagBadge category={article.category} />
         </div>

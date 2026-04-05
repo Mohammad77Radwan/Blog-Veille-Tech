@@ -1,5 +1,7 @@
 import { getPosts } from '@/actions/postActions';
 import { HomeExperience } from '@/components/home/HomeExperience';
+import { AuthorBio } from '@/components/home/AuthorBio';
+import { NewsletterSignup } from '@/components/home/NewsletterSignup';
 import type { Article } from '@/types/blog';
 
 export const dynamic = 'force-dynamic';
@@ -21,6 +23,8 @@ export default async function Home() {
       date: new Date(post.createdAt).toISOString(),
       readTime: estimateReadTimeFromContent(post.content),
       category: post.category,
+      views: post.views,
+      likes: post.likes,
     } satisfies Article,
   }));
 
@@ -29,11 +33,18 @@ export default async function Home() {
   const categoryCount = new Set(posts.map((post) => post.category)).size;
 
   return (
-    <HomeExperience
-      posts={mappedPosts}
-      featuredPosts={featuredPosts}
-      latestPosts={latestPosts}
-      categoryCount={categoryCount}
-    />
+    <>
+      <HomeExperience
+        posts={mappedPosts}
+        featuredPosts={featuredPosts}
+        latestPosts={latestPosts}
+        categoryCount={categoryCount}
+        topSlot={<AuthorBio />}
+      />
+
+      <div className="mx-auto mt-2 max-w-6xl space-y-6 px-4 pb-16 md:px-8 md:pb-20">
+        <NewsletterSignup />
+      </div>
+    </>
   );
 }

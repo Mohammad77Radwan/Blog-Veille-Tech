@@ -12,6 +12,8 @@ export interface SocialCommentRecord {
   authorId: string;
   parentId: string | null;
   body: string;
+  likes: number;
+  dislikes: number;
   createdAt: string;
   updatedAt: string;
   author: SocialUserSummary;

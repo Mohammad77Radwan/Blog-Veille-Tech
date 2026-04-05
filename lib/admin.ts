@@ -19,7 +19,7 @@ export async function getAdminDashboardData() {
             select: {
               posts: true,
               comments: true,
-              likes: true,
+              likeRecords: true,
               followers: true,
               following: true,
             },
@@ -42,7 +42,7 @@ export async function getAdminDashboardData() {
           _count: {
             select: {
               comments: true,
-              likes: true,
+              likeRecords: true,
             },
           },
         },
@@ -75,13 +75,13 @@ export async function getAdminDashboardData() {
     ]);
 
   const topPosts = [...posts]
-    .sort((left, right) => right._count.likes + right._count.comments - (left._count.likes + left._count.comments))
+    .sort((left, right) => right.likes + right._count.comments - (left.likes + left._count.comments))
     .slice(0, 5)
     .map((post) => ({
       id: post.id,
       title: post.title,
       slug: post.slug,
-      likes: post._count.likes,
+      likes: post.likes,
       comments: post._count.comments,
       shares: post.shareCount,
     }));
@@ -105,7 +105,7 @@ export async function getAdminDashboardData() {
       counts: {
         posts: user._count.posts,
         comments: user._count.comments,
-        likes: user._count.likes,
+        likes: user._count.likeRecords,
         followers: user._count.followers,
         following: user._count.following,
       },
@@ -123,7 +123,7 @@ export async function getAdminDashboardData() {
       shareCount: post.shareCount,
       createdAt: post.createdAt.toISOString(),
       counts: {
-        likes: post._count.likes,
+        likes: post.likes,
         comments: post._count.comments,
       },
       author: post.author,

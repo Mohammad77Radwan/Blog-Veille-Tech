@@ -6,6 +6,7 @@ import { Reveal } from '@/components/animations/Reveal';
 import { MarkdownArticle } from '@/components/content/MarkdownArticle';
 import { getPostBySlug } from '@/actions/postActions';
 import { PostSocialPanel } from '@/components/social/PostSocialPanel';
+import { getCurrentDbUser } from '@/lib/auth';
 import { isClerkConfigured } from '@/lib/clerk';
 
 export const dynamic = 'force-dynamic';
@@ -25,7 +26,8 @@ function estimateReadTimeFromContent(content: string): string {
 export default async function BlogPostPage({ params }: BlogPostPageProps) {
   const post = await getPostBySlug(params.slug);
   const clerkEnabled = isClerkConfigured();
-  const { userId } = clerkEnabled ? await auth() : { userId: null };
+  const { userId: clerkUserId } = clerkEnabled ? await auth() : { userId: null };
+  const currentDbUser = clerkEnabled && clerkUserId ? await getCurrentDbUser() : null;
 
   if (!post) {
     notFound();
@@ -35,13 +37,16 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
     dateStyle: 'medium',
     timeStyle: 'short',
   });
-  const initialLiked = userId ? post.likes.some((like) => like.authorId === userId) : false;
+  const initialLiked = currentDbUser ? post.likeRecords.some((like) => like.authorId === currentDbUser.id) : false;
+  const isAdmin = currentDbUser?.role === 'ADMIN' || currentDbUser?.role === 'MODERATOR';
   const comments = post.comments.map((comment) => ({
     id: comment.id,
     postId: comment.postId,
     authorId: comment.authorId,
     parentId: comment.parentId,
     body: comment.body,
+    likes: comment.likes,
+    dislikes: comment.dislikes,
     createdAt: comment.createdAt.toISOString(),
     updatedAt: comment.updatedAt.toISOString(),
     author: {
@@ -78,7 +83,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
 
           <div className="flex flex-wrap items-center gap-4 text-xs text-slate-400">
             <span>Written by {post.authorName}</span>
-            <span className="inline-flex items-center gap-1.5">{post._count.likes} likes</span>
+            <span className="inline-flex items-center gap-1.5">{post.likes} likes</span>
             <span className="inline-flex items-center gap-1.5">{post._count.comments} comments</span>
             <span className="inline-flex items-center gap-1.5">
               <CalendarDays className="w-4 h-4" aria-hidden="true" />
@@ -100,9 +105,10 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
               postId={post.id}
               postSlug={post.slug}
               postTitle={post.title}
-              initialLikeCount={post._count.likes}
+              initialLikeCount={post.likes}
               initialShareCount={post.shareCount}
               initialLiked={initialLiked}
+              isAdmin={isAdmin}
               comments={comments}
             />
           </Reveal>
